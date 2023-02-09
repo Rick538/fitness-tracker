@@ -1,0 +1,216 @@
+/*
+*******************************************************************************
+* Copyright (c) 2021 by M5Stack
+*                  Equipped with M5Core sample source code
+*                          配套  M5Core 示例源代码
+* Visit the website for more information：https://docs.m5stack.com/en/core/gray
+* 获取更多资料请访问：https://docs.m5stack.com/zh_CN/core/gray
+*
+* describe：ENVIII_SHT30_QMP6988.  环境传感器
+* date：2021/8/17
+*******************************************************************************
+  Please connect to Port A(22、21),Read temperature, humidity and atmospheric pressure and display them on the display screen
+  请连接端口A(22、21),读取温度、湿度和大气压强并在显示屏上显示
+*/
+#include <M5StickCPlus.h>
+#include "UNIT_ENV.h"
+#include "BluetoothSerial.h"
+
+
+
+
+SHT3X sht30;
+QMP6988 qmp6988;
+
+
+
+
+
+float pressure = 0.0;
+float aktualnitlak = 0.0;
+float nejnizsitlak = 0.0;
+float nejvyssitlak = 0.0;
+int dreps = 0;
+bool mezidrep = false;
+bool kali = true;
+float kal = 0.0;
+bool x = false;
+int prumertlaku = 0;
+int rozptyltlaku = 0;
+int prumertlakuakt = 0;
+float n = 0.0;
+float v = 0.0;
+float n1 = 0.0;
+float n2 = 0.0;
+float v1 = 0.0;
+float v2 = 0.0;
+
+
+
+void drep()
+{
+    M5.lcd.setCursor(110,10);
+    M5.Lcd.printf("drep");
+    M5.lcd.setCursor(160,10);
+    M5.Lcd.println(dreps);
+    M5.lcd.setCursor(110,20);
+    M5.Lcd.printf("kalorie");
+    M5.lcd.setCursor(160,20);
+    M5.Lcd.println(kal);
+} 
+void kalibrace()
+{
+  while (true)
+  {
+    M5.Lcd.setTextColor(WHITE);
+    M5.lcd.fillScreen(BLACK);
+    M5.lcd.setCursor(0,120);
+    M5.Lcd.printf("pro nastavení obou poloh drepu zmacknete tlacitko M5 pote prave postranni tlacitko");
+    M5.BtnB.read();
+    if (M5.BtnB.isPressed())
+    {
+      M5.lcd.setCursor(0,10);
+      M5.Lcd.printf("kalibrujete tlak nejnizsi vyčkejte");
+      n1 = aktualnitlak;
+      delay(2000);
+      aktualnitlak  = qmp6988.calcPressure();
+      n2 = aktualnitlak;
+      nejnizsitlak = (n1 + n2)/2;
+      n = ((((n1 -n2)/2)*(-1))/2);
+      Serial.print(nejnizsitlak);
+      M5.lcd.setCursor(0,15);
+      M5.Lcd.printf("kalibrace skončila");
+    }
+    M5.BtnA.read();
+    if (M5.BtnA.isPressed())
+    {
+      M5.lcd.setCursor(0,20);
+      M5.Lcd.printf("kalibrujete tlak nejvyssi vyčkejte");
+      v1 = aktualnitlak;
+      delay(2000);
+      aktualnitlak  = qmp6988.calcPressure();
+      v2 = aktualnitlak;
+      nejvyssitlak = (v1 + v2)/2;
+      v = ((((v1 -v2)/2)*(-1))/2);
+      Serial.print(nejvyssitlak);
+      M5.lcd.setCursor(0,25);
+      M5.Lcd.printf("kalibrace je u konce");
+    }
+    M5.lcd.setCursor(0,25);
+    M5.Lcd.printf("po kalibraci");
+    prumertlaku = (nejnizsitlak - nejvyssitlak);
+    rozptyltlaku = ((nejnizsitlak - nejvyssitlak)/2);
+    if(nejvyssitlak + prumertlaku == nejnizsitlak||nejnizsitlak  - prumertlaku == nejvyssitlak);
+    {
+      M5.lcd.setCursor(0,25);
+      M5.Lcd.printf("tlaky jsou špatně");
+      continue;
+    }
+    if(nejnizsitlak > 0|| nejvyssitlak > 0);
+    {
+      M5.lcd.setCursor(0,25);
+      M5.Lcd.printf("vše dobré");
+      break;
+    }
+  }
+}
+
+
+
+
+void setup() {
+  M5.begin(); //Init M5Stack.  初始化M5Stack
+  //M5.Power.begin(); //Init power  初始化电源模块
+  Serial.begin(115200);
+  M5.lcd.setRotation(1); 
+  M5.lcd.setTextSize(2);  //Set the text size to 2.  设置文字大小为2
+  Wire.begin(); //Wire init, adding the I2C bus.  Wire初始化, 加入i2c总线
+  qmp6988.init();
+  //M5.lcd.println(F("ENV Unit III test"));
+}
+int fontVelikost = 1.85;
+void loop() 
+{
+  M5.Lcd.setTextColor(WHITE);
+  M5.lcd.fillScreen(BLACK);
+  M5.lcd.setTextSize(fontVelikost);
+  if (kali = true)
+  {
+    kalibrace();
+    kali = false;
+  }
+  drep();
+  aktualnitlak  = qmp6988.calcPressure();
+  M5.lcd.setCursor(0,10);
+  M5.Lcd.printf("akt: %2.2f \n",aktualnitlak);
+  M5.lcd.setCursor(0,20);
+  M5.Lcd.printf("nejv: %2.2f \n",nejvyssitlak);
+  M5.lcd.setCursor(0,30);
+  M5.Lcd.printf("nejn: %2.2f \n",nejnizsitlak);
+  M5.lcd.setCursor(0,50);
+  M5.Lcd.printf("nta");
+  M5.lcd.setCursor(50,50);
+  M5.Lcd.print(n);
+  M5.lcd.setCursor(0,70);
+  M5.Lcd.printf("vta");
+  M5.lcd.setCursor(50,70);
+  M5.Lcd.print(v);
+  //zjištování nejnizsiho tlaku
+  if (aktualnitlak + n == nejnizsitlak||aktualnitlak - n == nejnizsitlak); 
+  {
+    //kalibrace
+    n1 = aktualnitlak; 
+    delay(2000);
+    aktualnitlak  = qmp6988.calcPressure();
+    n2 = aktualnitlak;
+    nejnizsitlak = (n1 + n2)/2;
+    n = ((((n1 -n2)/2)*(-1))/2);
+    prumertlakuakt = (nejnizsitlak - nejvyssitlak);
+    //výpis hodnot
+    M5.lcd.setCursor(0,90);
+    M5.Lcd.printf("jste NAHORE a nehybejte se");
+    //ověřování jestli hodnoty sedí
+    if (prumertlaku + rozptyltlaku == prumertlakuakt||prumertlaku - rozptyltlaku == prumertlakuakt);
+    {
+      if(mezidrep = true);
+      {
+        dreps ++;
+        mezidrep = false;
+      } 
+    }
+  }
+  //zjištovaní nejvyssiho tlaku
+  if (aktualnitlak + v == nejvyssitlak||aktualnitlak - v == nejvyssitlak);
+  {
+    //kalibrace
+    v1 = aktualnitlak;
+    delay(2000);
+    aktualnitlak  = qmp6988.calcPressure();
+    v2 = aktualnitlak;
+    nejvyssitlak = (v1 + v2)/2;
+    v = ((((v1 -v2)/2)*(-1))/2);
+    prumertlakuakt = (nejnizsitlak - nejvyssitlak);
+    //výpis hodnot
+    M5.lcd.setCursor(0,100);
+    M5.Lcd.printf("jste DOLE a nehybete se");
+    //ověřování jestli hodnoty sedí
+    if (prumertlaku + rozptyltlaku == prumertlakuakt||prumertlaku - rozptyltlaku == prumertlakuakt);
+    {
+      mezidrep = true;
+    }
+  }
+
+  //dřepy počítání
+  if (dreps >= 10)
+  {
+    drep();
+    
+  }
+
+
+
+
+  delay(800);
+  M5.Lcd.setTextColor(BLUE);
+  M5.lcd.fillScreen(BLACK);
+}
