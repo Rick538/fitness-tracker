@@ -8,21 +8,12 @@
 SHT3X sht30;
 QMP6988 qmp6988;
 
-<<<<<<< HEAD
 const char* ssid = "Beranovi 2,4GHZ";
 const char* password = "Beran 58";
 
 const char* server = "api.thingspeak.com";
 const String apiKey = "YH8H47Z47TJYKD7Y";
 const String channelID = "2044897";
-=======
-const char* ssid = "tksteti";
-const char* password = "ProsimTeNevim";
-
-const char* server = "api.thingspeak.com";
-const String apiKey = "YH8H47Z47TJYKD7Y";
-const String channelID = " 2044897";
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
 
 float nejnizsitlak = 0.0;
 float nejvyssitlak = 0.0;
@@ -35,16 +26,6 @@ int fontVelikost = 1.85;
 float zacatek = 0.0;
 float konec = 0.0;
 bool kali = true;
-<<<<<<< HEAD
-bool start = false;
-bool middle = false;
-bool end = false;
-int drep = 8;
-float kalorie = 0.0;
-float pomer_drep_kal = 0.0;       
-float cas_za_drep = 0.0;   
-float cas_za_cviceni = 0.0;                                                       
-=======
 bool start = true;
 bool middle = false;
 bool end = false;
@@ -54,7 +35,6 @@ float cas_za_drep = 0.0;
 float caz_za_cviceni = 0.0; 
 
 
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
 
 void kalibrace()
 {
@@ -81,34 +61,16 @@ void kalibrace()
     {
       continue;
     }
-<<<<<<< HEAD
-    if(nejnizsitlak > 0||nejvyssitlak > 0)
-=======
     if(nejnizsitlak > 0 || nejvyssitlak > 0)
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
     {
       rozdiltlaku = hps - hpf;
       if (rozdiltlaku < 0)
       {
         rozdiltlaku * (-1);
-<<<<<<< HEAD
         tolerancetlaku = rozdiltlaku * 0.15;
         round(tolerancetlaku);
         start = true;
         return;
-=======
-        tolerancetlaku = rozdiltlaku * 0.25;
-        round(tolerancetlaku);
-        return;
-      }
-      if (rozdiltlaku > 0)
-      {
-        tolerancetlaku = rozdiltlaku * 0.25;
-        round(tolerancetlaku);
-        return;
-      }
-
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
       }
       if (rozdiltlaku > 0)
       {
@@ -120,7 +82,6 @@ void kalibrace()
     }
   }
 }
-<<<<<<< HEAD
 void konec_hodnoty()
 {
   M5.lcd.setTextSize(2);
@@ -140,8 +101,6 @@ void konec_hodnoty()
   M5.Lcd.println(pomer_drep_kal);
   delay(5000);
 }
-=======
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
 void stats()
 {
   M5.lcd.setCursor(0,5);
@@ -150,15 +109,11 @@ void stats()
   M5.Lcd.printf("nejvyssi tlak: %.0f \n",nejvyssitlak);
   M5.lcd.setCursor(0,25);
   M5.Lcd.printf("aktualni tlak: %.0f \n", aktualnitlak);
-<<<<<<< HEAD
   M5.lcd.setCursor(0,35);
   M5.Lcd.printf("rozdil tlaku: %.0f \n", rozdiltlaku);
   M5.lcd.setCursor(0,45);
   M5.Lcd.printf("tolerance tlaku: %.0f \n", tolerancetlaku);
   M5.lcd.setCursor(0,55);
-=======
-  M5.lcd.setCursor(0,100);
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
   M5.Lcd.printf("cas: %.0f \n", cas_za_drep);
 }
 WiFiClient client;
@@ -173,19 +128,11 @@ void setup() {
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-<<<<<<< HEAD
     Serial.println("Connecting Wifi");
   }
   Serial.println("");
   Serial.println("WiFi connected!");
   delay(1000);
-=======
-    Serial.println("Connecting to WiFi...");
-  }
-
-  Serial.println("Connected to WiFi!");
-}
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
 }
 void loop()
 {
