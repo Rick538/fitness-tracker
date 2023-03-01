@@ -10,8 +10,6 @@ QMP6988 qmp6988;
 
 const char* ssid = "Beranovi 2,4GHZ";
 const char* password = "Beran 58";
-
-const char* server = "api.thingspeak.com";
 const String apiKey = "YH8H47Z47TJYKD7Y";
 const String channelID = "2044897";
 
@@ -26,15 +24,13 @@ int fontVelikost = 1.85;
 float zacatek = 0.0;
 float konec = 0.0;
 bool kali = true;
-bool start = true;
+bool start = false;
 bool middle = false;
 bool end = false;
-int drep = 0;
-float kalorie = 0.0;
-float cas_za_drep = 0.0;
-float caz_za_cviceni = 0.0; 
-
-
+int drep = 8;
+float kalorie = 0.0;      
+float cas_za_drep = 0.0;   
+float cas_za_cviceni = 0.0;                                                       
 
 void kalibrace()
 {
@@ -61,7 +57,7 @@ void kalibrace()
     {
       continue;
     }
-    if(nejnizsitlak > 0 || nejvyssitlak > 0)
+    if(nejnizsitlak > 0||nejvyssitlak > 0)
     {
       rozdiltlaku = hps - hpf;
       if (rozdiltlaku < 0)
@@ -95,10 +91,6 @@ void konec_hodnoty()
   M5.Lcd.printf("kalorie: ");
   M5.lcd.setCursor(105,50);
   M5.Lcd.println(kalorie);
-  M5.lcd.setCursor(0,80);
-  M5.Lcd.printf("pom. drep/kal: ");
-  M5.lcd.setCursor(240,80);
-  M5.Lcd.println(pomer_drep_kal);
   delay(5000);
 }
 void stats()
@@ -113,9 +105,10 @@ void stats()
   M5.Lcd.printf("rozdil tlaku: %.0f \n", rozdiltlaku);
   M5.lcd.setCursor(0,45);
   M5.Lcd.printf("tolerance tlaku: %.0f \n", tolerancetlaku);
-  M5.lcd.setCursor(0,55);
+  M5.lcd.setCursor(0,65);
   M5.Lcd.printf("cas: %.0f \n", cas_za_drep);
 }
+
 WiFiClient client;
 void setup() {
   M5.begin(); //Init M5Stack.  初始化M5Stack
@@ -125,14 +118,15 @@ void setup() {
   Wire.begin(); //Wire init, adding the I2C bus.  Wire初始化, 加入i2c总线
   qmp6988.init();
   //M5.lcd.println(F("ENV Unit III test"));
+  M5.begin();
+  M5.Lcd.println("Connecting to Wi-Fi...");
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting Wifi");
+    M5.Lcd.print(".");
   }
-  Serial.println("");
-  Serial.println("WiFi connected!");
-  delay(1000);
+  M5.Lcd.print("");
+  M5.Lcd.print("Wi-Fi connected!");
 }
 void loop()
 {
@@ -152,6 +146,7 @@ void loop()
     if (start)
     {
       zacatek = millis();
+      Serial.println(zacatek);
       M5.lcd.setCursor(0,75);
       M5.lcd.printf("jste na zacatku, následuje pohyb dolu");
       middle = true;
@@ -159,16 +154,17 @@ void loop()
     if (end)
     {
       konec = millis();
+      Serial.println(konec);
       kalorie = kalorie + 0.5;
       drep = drep + 1;
-      cas_za_drep = (start + konec)/1000;
-      pomer_drep_kal = drep, kalorie;
+      cas_za_drep = (konec - start)/1000;
+      Serial.println(cas_za_drep);
       M5.lcd.setCursor(0,75);
       cas_za_cviceni = cas_za_cviceni + cas_za_drep;
       if (drep >= 10)
       {
         M5.lcd.printf("jste na konci, udelal jste drep\r\n resetovali se hodnoty, muzete pokracovat");
-        String url = "http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(pomer_drep_kal)+ "&field2=" + String(drep, cas_za_cviceni);
+        String url = "http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(cas_za_drep)+ "&field2=" + String(kalorie);
         HTTPClient http;
         http.begin(client, url);
         int httpCode = http.GET();
@@ -184,6 +180,7 @@ void loop()
         nejnizsitlak = 0.0;
         aktualnitlak = 0.0;
         nejvyssitlak = 0.0;
+        delay(2000);
         kalibrace();
       }
       start = true;
@@ -191,7 +188,6 @@ void loop()
       end = false; 
     }
   }
-<<<<<<< HEAD
   else 
   {
     M5.lcd.setCursor(0,60);
@@ -211,60 +207,6 @@ void loop()
   {
     M5.lcd.setCursor(0,60);
     M5.Lcd.printf("jste v pohybu");
-=======
-  if (nejnizsitlak + tolerancetlaku >= aktualnitlak)
-  {
-    if (start)
-    {
-      zacatek = millis();
-      M5.lcd.setCursor(0,75);
-      M5.Lcd.printf("jsi v dřepu, dřep je hotov");
-      middle = true;
-    }
-    if (end)
-    {
-      konec = millis();
-      kalorie = kalorie + 0.5;
-      drep = drep + 1;
-      M5.Lcd.setCursor(0,75);
-      M5.Lcd.printf("jste na konci, udělali jste drep");
-      String url = "http://" + String(server) + "/update?api_key=" + apiKey +
-              "&field1=" + String(drep) +
-              "&field2=" + String(kalorie) +
-              "&field3=" + String(cas_za_drep);
-       Serial.println(url);
-  
-    HTTPClient http;
-    http.begin(url);
-    int httpResponseCode = http.GET();
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
-    http.end();
-      if (drep >= 10)
-      {
-        cas_za_drep = (start + konec)/1000;
-        drep = 0;
-        kalorie = 0.0;
-        nejnizsitlak = 0.0;
-        nejvyssitlak = 0.0;
-        aktualnitlak = 0.0;
-        kalibrace();
-      }
-      start = true;
-      middle = false;
-      end = false;
-    }
-  }
-  if (nejvyssitlak - tolerancetlaku <= aktualnitlak)
-  {
-    if (middle)
-    {
-      M5.lcd.setCursor(0,75);
-      M5.Lcd.printf("jsi v pod dřepu, poslední funguje");
-      end = true;
-      start = false;
-    }
->>>>>>> 5dbc9acaffc34d5ddf235c55ca4f103b3111bd51
   }
   delay(800);
 }
