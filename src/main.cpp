@@ -26,11 +26,10 @@ bool Kali = true;
 bool Start = false;
 bool Middle = false;
 bool End = false;
-int Drep = 8;
+int Drep = 0;
 float Kalorie = 0.0;
 float CasZaCviceni = 0.0;
 float UplynulyCas = 0.0;
-int PocetCviceni = 9;
 time_t start, current;
 
 void kalibrace()
@@ -53,6 +52,10 @@ void kalibrace()
     {   
       NejvyssiTlak = qmp6988.calcPressure();
       Hps = NejvyssiTlak;
+    }
+    if (NejnizsiTlak <= 0)
+    {
+      continue;
     }
     if (NejnizsiTlak >= NejvyssiTlak)
     {
@@ -141,7 +144,6 @@ void loop()
   M5.lcd.fillScreen(BLACK);
   AktualniTlak = qmp6988.calcPressure();
   stats();
-  Serial.println(ToleranceTlaku);
   if (NejnizsiTlak + ToleranceTlaku >= AktualniTlak)
   {
     if (Start == true)
@@ -156,14 +158,12 @@ void loop()
 
       Drep ++;
       M5.lcd.setCursor(0,85);
-      M5.lcd.printf("drep hotov \r\npokracujte smer dolu");
-      if (Drep >= 10)
+      M5.lcd.printf("drep hotov \r\nvyckejte 1 vterinu");
+      if (Drep >= 5)
       {
-        PocetCviceni ++;
-        Serial.println(PocetCviceni);
         current = time(NULL);
-        CasZaCviceni =(int) difftime(current, start);
-        UplynulyCas = CasZaCviceni /3600;
+        CasZaCviceni = difftime(current, start) * 10;
+        UplynulyCas = CasZaCviceni /36000;
         Kalorie = 6 * 60 * UplynulyCas;
         M5.lcd.setCursor(0,85);
         M5.lcd.printf("jste na konci celého cvičení \r\nresetovali se hodnoty \r\nmuzete pokracovat");
@@ -178,29 +178,6 @@ void loop()
           Serial.println("Data se neposlala na ThingSpeak");
         }
         http.end();
-        if (PocetCviceni >= 10);
-        {
-          WiFiClient client;
-          if (client.connect(server, 80)) {
-            String url = "/channels/" + String(channelId);
-            client.print(String("DELETE ") + url + " HTTP/1.1\r\n" +
-                        "Host: " + server + "\r\n" +
-                        "Content-Type: application/x-www-form-urlencoded\r\n" +
-                        "Connection: close\r\n" +
-                        "X-THINGSPEAKAPIKEY: " + apiKey + "\r\n\r\n");
-            while (client.connected()) {
-              String line = client.readStringUntil('\n');
-              if (line == "\r") {
-                break;
-              }
-            }
-            String response = client.readString();
-            Serial.println(response);
-          }
-          else {
-            Serial.println("Chyba připojení k ThingSpeak");
-          }
-        }
         konec_hodnoty();
         Drep = 0;
         Kalorie = 0;
