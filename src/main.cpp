@@ -110,7 +110,9 @@ void stats()
   M5.lcd.setCursor(0,45);
   M5.Lcd.printf("tolerance tlaku: %.0f \n", ToleranceTlaku);
   M5.lcd.setCursor(0,65);
-  M5.Lcd.printf("pocet drepu: \n", Drep);
+  M5.Lcd.printf("drepy: ");
+  M5.lcd.setCursor(35,65);
+  M5.Lcd.println(Drep);
 
 }
 
