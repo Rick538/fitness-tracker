@@ -26,11 +26,13 @@ bool Kali = true;
 bool Start = false;
 bool Middle = false;
 bool End = false;
+bool Time = false;
 int Drep = 0;
 float Kalorie = 0.0;
 float CasZaCviceni = 0.0;
 float UplynulyCas = 0.0;
-time_t start, current;
+bool Timer = false;
+time_t TimeStart, TimeEnd;
 
 void kalibrace()
 {
@@ -77,6 +79,7 @@ void kalibrace()
         ToleranceTlaku = RozdilTlaku * 0.15;
         round(ToleranceTlaku);
         Start = true;
+        Timer = true;
         return;
       }
     }
@@ -153,7 +156,11 @@ void loop()
       M5.lcd.setCursor(0,85);
       M5.lcd.printf("jste na zacatku \r\nnásleduje pohyb dolu");
       Middle = true;
-      start = time(NULL);
+      if (Timer == true)
+      {
+        TimeStart = time(NULL);
+        Timer = false;
+      }
     }
     if (End == true)
     {
@@ -163,10 +170,9 @@ void loop()
       M5.lcd.printf("drep hotov \r\nvyckejte 1 vterinu");
       if (Drep >= 5)
       {
-        current = time(NULL);
-        CasZaCviceni = difftime(current, start) * 10;
-        UplynulyCas = CasZaCviceni /36000;
-        Kalorie = 6 * 60 * UplynulyCas;
+        TimeEnd = time(NULL);
+        CasZaCviceni = difftime(TimeEnd, TimeStart);
+        Kalorie = ((6 * 60 * 0.0175)/60)*CasZaCviceni;
         M5.lcd.setCursor(0,85);
         M5.lcd.printf("jste na konci celého cvičení \r\nresetovali se hodnoty \r\nmuzete pokracovat");
         String url = "http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(CasZaCviceni) + "&field2=" + String(Kalorie) + "&field3=" + String(Drep);
