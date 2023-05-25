@@ -40,7 +40,7 @@ void kalibrace()
   M5.Lcd.setTextColor(WHITE);
   M5.lcd.fillScreen(BLACK);
   M5.lcd.setCursor(0,5);
-  M5.Lcd.printf("pro kalibraci \r\nzmacknete tlacitko \r\nM5 a prave postranni\r\nprosim kalibrujte \r\nspravne jinak \r\nvas to \r\nnepusti dal");
+  M5.Lcd.printf("pro kalibraci \r\nzmacknete tlacitka \r\nM5 kdyz stojite\r\npostranni v drepu\r\nvyckejte vzdy \r\n1 vterinu \r\nprosim nepospichejte");
   while(1)
   {
     M5.BtnA.read();
