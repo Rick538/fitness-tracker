@@ -5,14 +5,15 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <time.h>
+#include <password.h>
 
 QMP6988 qmp6988;
 
-const char* ssid = "Beranovi 2,4GHZ";
-const char* password = "Beran 58";
-const char* server = "api.thingspeak.com";
-const String apiKey = "YH8H47Z47TJYKD7Y";
-const String channelId = "2044897";
+const char* ssid = jmeno;
+const char* password = heslo;
+const char* server = web;
+const String apiKey = klic;
+const String channelId = kanal;
 
 float NejnizsiTlak = 0.0;
 float NejvyssiTlak = 0.0;
